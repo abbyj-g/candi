@@ -1,4 +1,4 @@
-####ACQUIRING OCCURRENCE DATA FUNCTIONS## 
+####ACQUIRING OCCURRENCE DATA FUNCTIONS##
 #########################################
 #The functions in this script are:
 # get_bien_occ_records()
@@ -10,54 +10,74 @@
 
 ##function defs for bien and gbif data grab
 
-#get bien records
+#' get bien records
+#'
+#' A function to download occurrence data from the BIEN database for a given list of species
+#' @param sp A species name. First letter of genus names are capitalized and specific epithet is lowercase with a space separating the two.
+#' @return A dataframe of occurrence data for species sp
+#' @examples
+#' get_bien_occ_records(c("Notholaena standleyi","Pellaea truncata"))
 get_bien_occ_records <- function(sp) {
   records <- BIEN_occurrence_species(sp)
   records <- records[!is.na(records$latitude),]
-  if (nrow(records) < 1 ) { 
+  if (nrow(records) < 1 ) {
     return(NULL) } else {
-      return(records) 
+      return(records)
     }
 }
 
-#get gbif records
-get_gbif_occ_records <- function(sp, limit = limit) {
-  res <- occ_search(scientificName = sp, limit = limit, hasCoordinate	= TRUE) 
+#' get gbif records
+#'
+#' A function to download occurrence data from the GBIF database for a given list of species
+#' @param sp A species name. First letter of genus names are capitalized and specific epithet is lowercase with a space separating the two.
+#' @param limit A threshold of maximum number of occurrences to download. Default set to 500
+#' @return A dataframe of occurrence data for species sp
+#' @examples
+#' get_gbif_occ_records(c("Notholaena standleyi","Pellaea truncata"), limit = 100)
+get_gbif_occ_records <- function(sp, limit = 500) {
+  res <- occ_search(scientificName = sp, limit = limit, hasCoordinate	= TRUE)
   if ("data.frame" %in% class(res$data)) {
     res %>%  #remove entries with some error codes (could make this a function argument...)
-      occ_issues(-bri, -cdiv, -cdout, -cucdmis, 
+      occ_issues(-bri, -cdiv, -cdout, -cucdmis,
                  -preneglat, -preneglon, -preswcd,
                  -txmatfuz, -txmathi, -txmatnon, -zerocd) -> results
-    results <- results$data 
+    results <- results$data
     return(results)
   } else { return( NULL ) }
-} 
+}
 
-#get both gbif and bien records and combine
-get_both_occ_records <- function(sp, limit = limit) {
+#' get both gbif and bien records and combine
+#'
+#' A function to download occurrence data for a species from both the BIEN and GBIF database and combine the records
+#' @param sp A species name. First letter of genus names are capitalized and specific epithet is lowercase with a space separating the two.
+#' @param limit A threshold of maximum number of occurrences to download. Default set to 500
+#' @return A dataframe of occurrence data for species sp
+#' @examples
+#' get_both_occ_records("Notholaena standleyi", limit = 100)
+get_both_occ_records <- function(sp, limit = 500) {
   bien_results <- get_bien_occ_records(sp = sp) #get BIEN records
   gbif_results <- get_gbif_occ_records(sp = sp, limit = limit) #get GBIF records
-  
+
   if (is.null(bien_results) & is.null(gbif_results)) {
     return(NULL)
   } else {
-    #if there are only results from BIEN: 
+    #if there are only results from BIEN:
     if (!is.null(bien_results) & is.null(gbif_results)) {
       as.tibble(bien_results) %>%
         dplyr::select(latitude, longitude) %>%
         mutate(source = rep("BIEN", times = nrow(bien_results))) %>%
         mutate(species = rep(sp, times = nrow(bien_results))) -> results
     }
-    
+
     #if there are only results from GBIF:
     if (is.null(bien_results) & !is.null(gbif_results)) {
       as.tibble(gbif_results) %>%
-        dplyr::select(latitude = decimalLatitude, 
+        dplyr::select(latitude = decimalLatitude,
                       longitude = decimalLongitude) %>%
         mutate(source = rep("GBIF", times = nrow(gbif_results))) %>%
         mutate(species = rep(sp, times = nrow(gbif_results))) -> results
-    }  
-    
+    }
+
     #if there are results from both, combine them
     if (!is.null(bien_results) & !is.null(gbif_results)) {
       as.tibble(bien_results) %>%
@@ -68,15 +88,23 @@ get_both_occ_records <- function(sp, limit = limit) {
                              longitude = gbif_results$decimalLongitude,
                              species = rep(sp, times = nrow(gbif_results)),
                              source = rep("GBIF", times = nrow(gbif_results)))) -> results
-    } 
-    
+    }
+
     return(results)
   }
 }
 
-# changing this general function to loop over vector of species and return a list 
+#' Get occurrence records
+#'
+#' A function that downloads occurrence records for each species in a list of species from either BIEN, GBIF, or both databases
+#' @param species A list of species separated by spaces. First letter of genus names are capitalized and specific epithet is lowercase with a space separating the two.
+#' @param limit A threshold of maximum number of occurrences to download. Default set to 500
+#' @param database User specifies if they want occurrence data downloaded from BIEN, GBIF, or both. Value must be "bien", "gbif", or "both"
+#' @return A list of dataframes of occurrence data for each species in species
+#' @examples
+#' get_occ_records(c("Notholaena standleyi","Pellaea truncata", "Astrolepis integerrima"), "both", limit = 500)
 get_occ_records <- function(species, database, limit = 500){
-  
+
   if (database == "bien"){
     results <- list()
     for (i in 1:length(species)){
@@ -88,7 +116,7 @@ get_occ_records <- function(species, database, limit = 500){
     names(results) <- species
     return(results)
   }
-  
+
   if (database == "gbif"){
     results <- list()
     for (i in 1:length(species)){
@@ -100,7 +128,7 @@ get_occ_records <- function(species, database, limit = 500){
     names(results) <- species
     return(results)
   }
-  
+
   if (database == "both"){
     results <- list()
     for (i in 1:length(species)){
@@ -112,6 +140,6 @@ get_occ_records <- function(species, database, limit = 500){
     }
     return(results)
   }
-  
+
   else { stop("Please set database argument equal to either bien, gbif, or both to select data source") }
 }
