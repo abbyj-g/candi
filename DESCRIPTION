@@ -1,11 +1,12 @@
 Package: candi
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Climate and Niche Distribution Inference
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Abigail Jackson-Gain and Carrie Tribble
+Maintainer: Abigail Jackson-Gain <abbyjackson.gain@gmail.com>
+Description: A package designed to streamline the process of creating species distribution models for large numbers of taxa at once. 
+    Includes functions for occurrence data collection from GBIF and BIEN biodiversity databases and subsequent cleaning of the data. Also includes functions to harvest climate, elevation, and geological data for inputs to a Maxent model. Also includes a modeling function to automatically create SDMs of all species. 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.0
