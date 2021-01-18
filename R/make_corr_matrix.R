@@ -1,6 +1,9 @@
-#make correlation matrix between the 19 bioclim variables
-#User can use results to make decisions about removing highly correlated variables
-
+#' make corr matrix
+#'
+#' A functiont that creates a correlation matrix between the environmental data variables of correlation within the area of the maximum extents of occurrence points
+#' @param ocurrences A list of data frames with the occurrence data for each species
+#' @param environment_data A raster stack of environmental raster data variables
+#' @return a pdf of the correlation matrix is saved to the local disk
 make_corr_matrix <- function(occurrences, environment_data){
   #trim environmental layers to the extent of the occurrence data
   #this trimmed version ONLY for the purpose of correlation analysis
