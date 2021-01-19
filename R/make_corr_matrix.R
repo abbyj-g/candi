@@ -19,16 +19,16 @@ make_corr_matrix <- function(occurrences, environment_data){
   rect_coords <- cbind(rect_lons, rect_lats)
 
   ##make spatial polygon##
-  p <- Polygon(rect_coords)
-  ps <- Polygons(list(p),1)
-  polygon_mask <- SpatialPolygons(list(ps))
+  p <- sp::Polygon(rect_coords)
+  ps <- sp::Polygons(list(p),1)
+  polygon_mask <- sp::SpatialPolygons(list(ps))
 
   ##crop raster stack##
-  cropped_clim_corr <- crop(environment_data, polygon_mask)
+  cropped_clim_corr <- raster::crop(environment_data, polygon_mask)
 
   #correlation analysis between layers
   print("Calculating correlation coefficients of climatic variables")
-  corr <- layerStats(cropped_clim_corr, 'pearson', na.rm=TRUE)
+  corr <- raster::layerStats(cropped_clim_corr, 'pearson', na.rm=TRUE)
   c_matrix <- corr$`pearson correlation coefficient`
   name <- paste0("correlationBioClim", Sys.Date(), ".csv")
   print(paste0("Saving correlation coefficients to file in your current working directory: ",
@@ -36,18 +36,18 @@ make_corr_matrix <- function(occurrences, environment_data){
   write.csv(c_matrix, file = name)
 
   #make a correlation plot, highlighting  absolute values greater than 0.8
-  df <- as.data.frame(c_matrix)
-  ggcorr(df, geom = "blank", label = TRUE, hjust = 0.75) +
-    geom_point(size = 10, aes(alpha = abs(coefficient) > 0.8)) +
-    scale_alpha_manual(values = c("TRUE" = 0.25, "FALSE" = 0)) +
-    guides(color = FALSE, alpha = FALSE)
+  df <- raster::as.data.frame(c_matrix)
+  ggplot2::ggcorr(df, geom = "blank", label = TRUE, hjust = 0.75) +
+    ggplot2::geom_point(size = 10, aes(alpha = abs(coefficient) > 0.8)) +
+    ggplot2::scale_alpha_manual(values = c("TRUE" = 0.25, "FALSE" = 0)) +
+    ggplot2::guides(color = FALSE, alpha = FALSE)
 
   #export plot as a pdf, saved as correlation_plot.pdf in your working directory
   name <- paste0("correlationsBioClim", Sys.Date(), ".pdf")
   print(paste0("Saving PDF of correlation coefficients plot to your current working directory: ",
                getwd(), "/", name))
   print("Correlation coefficients greater than .8 or less than -.8 are highlighted in grey.")
-  ggsave(name, plot = last_plot(), device = "pdf", path = NULL,
+  ggplot2::ggsave(name, plot = last_plot(), device = "pdf", path = NULL,
          scale = 1, width = NA, height = NA)
 
   return(c)

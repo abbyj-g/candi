@@ -11,8 +11,8 @@ remove_dup_locs <- function(df_list) {
     df <- df_list[[i]]
     if ("latitude" %in% colnames(df)){
       df_new <-  df[!duplicated(df[,c("latitude", "longitude")]),]
-      rows_originial <- nrow(df)
-      rows_new <- nrow(df_new)
+      rows_originial <- raster::nrow(df)
+      rows_new <- raster::nrow(df_new)
       print(paste0("Removed ", rows_originial - rows_new,
                    " duplicated localities from ", names(df_list)[i], ", ",
                    rows_new, " unique localities left."))

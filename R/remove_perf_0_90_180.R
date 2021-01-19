@@ -14,7 +14,7 @@ remove_perf_0_90_180 <- function(df_list) {
     if (length(dont_keep > 0)) {
       print(paste0("Removing ", dont_keep,
                    "localities that fall exactly at 0, 90, or 180 degrees from ",
-                   names(results_list)[i], ", ", nrow(df[-dont_keep, ]), " localities left." ))
+                   names(results_list)[i], ", ", raster::nrow(df[-dont_keep, ]), " localities left." ))
       df <- df[-dont_keep, ]
     } else {print(paste0("No localities fall exactly at 0, 90, or 180 degrees in ", names(df_list)[i]))}
     results_list[[i]] <- df

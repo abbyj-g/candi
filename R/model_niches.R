@@ -17,7 +17,7 @@ model_niches <- function(occ_data, enviro_data, reps = 3, reptype = "bootstrap",
 
     occ_data[[i]] %>%
       dplyr::select(longitude = longitude, latitude = latitude) %>%
-      as.matrix() -> sp
+      raster::as.matrix() -> sp
 
     sp_name <- sub(" ", "_", names(occ_data[i]))
 
@@ -33,7 +33,7 @@ model_niches <- function(occ_data, enviro_data, reps = 3, reptype = "bootstrap",
 
       #####  MAXENT modeling
 
-      mx <- maxent(clim_data, sp, removeDuplicates=TRUE,
+      mx <- dismo::maxent(clim_data, sp, removeDuplicates=TRUE,
                    replicates=reps, replicatetype=reptype)
       maxent_objs[[i]] <- mx
       names(maxent_objs)[i] <- sp_name
@@ -45,10 +45,10 @@ model_niches <- function(occ_data, enviro_data, reps = 3, reptype = "bootstrap",
         tryCatch({
 
           # set extent based on location of points, plus a 5% buffer
-          e2 <- extent(sp) * 1.05
+          e2 <- raster::extent(sp) * 1.05
 
           # save to working directory
-          model <- predict(mx, clim_data, ext=e2,
+          model <- dismo::predict(mx, clim_data, ext=e2,
                            filename = paste0(output_dir, sp_name, ".asc"),
                            overwrite = TRUE,
                            progress='text')

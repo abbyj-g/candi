@@ -14,18 +14,18 @@ remove_ocean_points <- function(df_list, world_map){
 
     df <- df_list[[i]]
 
-    coordinates(df) <- ~longitude+latitude #create a spatial points df from gbif results
-    proj4string(df) <- world_map@proj4string #give it the same proj as our world map
-    ovr <- over(df, world_map) #check what country each point is in, given our world map
+    sp::coordinates(df) <- ~longitude+latitude #create a spatial points df from gbif results
+    sp::proj4string(df) <- world_map@proj4string #give it the same proj as our world map
+    ovr <- sp::over(df, world_map) #check what country each point is in, given our world map
 
     df@data <- cbind(df@data, ovr) #bind together the original dataframe with the over results
 
-    df <- as.data.frame(df)
+    df <- raster::as.data.frame(df)
 
     if (sum(is.na(df$NAME_ENGLI)) > 0) {
       df_new <- df[-which(is.na(df$NAME_ENGLI)),]
-      rows_original <- nrow(df)
-      rows_new <- nrow(df_new)
+      rows_original <- raster::nrow(df)
+      rows_new <- raster::nrow(df_new)
       print(paste0("Removed ", rows_original - rows_new,
                    " localities in the ocean ", names(df_list)[i], ", ",
                    rows_new, " localities left."))
@@ -35,7 +35,7 @@ remove_ocean_points <- function(df_list, world_map){
       df_return <- df[,c("latitude", "longitude", "source", "species")]
     }
 
-    results_list[[i]] <- as.tibble(df_return)
+    results_list[[i]] <- tibble::as.tibble(df_return)
   }
   names(results_list) <- names(df_list)
   return(results_list)
