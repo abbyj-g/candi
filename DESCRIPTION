@@ -12,3 +12,12 @@ LazyData: true
 RoxygenNote: 7.1.0
 Depends: 
     R (>= 2.10)
+Imports: 
+    BIEN,
+    dismo,
+    dplyr,
+    ggplot2,
+    raster,
+    rgbif,
+    sp,
+    tibble
