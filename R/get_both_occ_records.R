@@ -15,31 +15,31 @@ get_both_occ_records <- function(sp, limit = 500) {
   } else {
     #if there are only results from BIEN:
     if (!is.null(bien_results) & is.null(gbif_results)) {
-      as.tibble(bien_results) %>%
-        dplyr::select(latitude, longitude) %>%
-        mutate(source = rep("BIEN", times = nrow(bien_results))) %>%
-        mutate(species = rep(sp, times = nrow(bien_results))) -> results
+      a <- tibble::as_tibble(bien_results)
+        b <- dplyr::select(a, latitude, longitude)
+        c <- dplyr::mutate(b, source = rep("BIEN", times = nrow(bien_results)))
+        results <- dplyr::mutate(c, species = rep(sp, times = nrow(bien_results)))
     }
 
     #if there are only results from GBIF:
     if (is.null(bien_results) & !is.null(gbif_results)) {
-      as.tibble(gbif_results) %>%
-        dplyr::select(latitude = decimalLatitude,
-                      longitude = decimalLongitude) %>%
-        mutate(source = rep("GBIF", times = nrow(gbif_results))) %>%
-        mutate(species = rep(sp, times = nrow(gbif_results))) -> results
+      a <- tibble::as_tibble(gbif_results)
+        b <- dplyr::select(a, latitude = decimalLatitude,
+                      longitude = decimalLongitude)
+        c <- dplyr::mutate(b, source = rep("GBIF", times = nrow(gbif_results)))
+        results <- dplyr::mutate(c, species = rep(sp, times = nrow(gbif_results)))
     }
 
     #if there are results from both, combine them
     if (!is.null(bien_results) & !is.null(gbif_results)) {
-      as.tibble(bien_results) %>%
-        dplyr::select(latitude, longitude) %>%
-        mutate(source = rep("BIEN", times = nrow(bien_results))) %>%
-        mutate(species = rep(sp, times = nrow(bien_results))) %>%
-        bind_rows(data.frame(latitude = gbif_results$decimalLatitude,
+      a <- tibble::as_tibble(bien_results)
+        b <- dplyr::select(a, latitude, longitude)
+        c <- dplyr::mutate(b, source = rep("BIEN", times = nrow(bien_results)))
+        d <- dplyr::mutate(c, species = rep(sp, times = nrow(bien_results)))
+        results <- dplyr::bind_rows(d, data.frame(latitude = gbif_results$decimalLatitude,
                              longitude = gbif_results$decimalLongitude,
                              species = rep(sp, times = nrow(gbif_results)),
-                             source = rep("GBIF", times = nrow(gbif_results)))) -> results
+                             source = rep("GBIF", times = nrow(gbif_results))))
     }
 
     return(results)

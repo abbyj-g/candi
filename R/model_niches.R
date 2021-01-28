@@ -15,9 +15,9 @@ model_niches <- function(occ_data, enviro_data, reps = 3, reptype = "bootstrap",
   for (i in 1:length(occ_data)) {
     ##### Prepare occurrence data for each species
 
-    occ_data[[i]] %>%
-      dplyr::select(longitude = longitude, latitude = latitude) %>%
-      raster::as.matrix() -> sp
+
+      a <- dplyr::select(occ_data[[i]], longitude = longitude, latitude = latitude)
+      sp <- raster::as.matrix(a)
 
     sp_name <- sub(" ", "_", names(occ_data[i]))
 
